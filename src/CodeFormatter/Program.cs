@@ -102,6 +102,7 @@ namespace CodeFormatter
             engine.FileNames = options.FileNames;
             engine.CopyrightHeader = options.CopyrightHeader;
             engine.AllowTables = options.AllowTables;
+            engine.DiagnosticsOutputFilename = options.DiagnosticsOutputFileName;
             engine.Verbose = options.Verbose;
 
             if (options.UseAnalyzers)

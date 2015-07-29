@@ -14,6 +14,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System.IO;
+using System.Security;
 
 namespace Microsoft.DotNet.CodeFormatting
 {
@@ -73,6 +75,12 @@ namespace Microsoft.DotNet.CodeFormatting
         {
             get { return _verbose; }
             set { _verbose = value; }
+        }
+
+        public string DiagnosticsOutputFilename
+        {
+            get { return _options.DiagnosticsOutputFileName; }
+            set { _options.DiagnosticsOutputFileName = value; }
         }
 
         public ImmutableArray<IRuleMetadata> AllRules
@@ -207,6 +215,33 @@ namespace Microsoft.DotNet.CodeFormatting
 
             var diagnostics = await GetDiagnostics(project, cancellationToken).ConfigureAwait(false);
 
+            if (DiagnosticsOutputFilename != string.Empty)
+            {
+                try
+                {
+                    using (var fileLogger = new FileFormatLogger(Path.GetFullPath(DiagnosticsOutputFilename)))
+                    {
+                        DiagnosticLogger.WriteDiagnostics(diagnostics, fileLogger);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (ex is UnauthorizedAccessException ||
+                        ex is ArgumentException ||
+                        ex is ArgumentNullException ||
+                        ex is DirectoryNotFoundException ||
+                        ex is IOException ||
+                        ex is PathTooLongException ||
+                        ex is NotSupportedException)
+                    {
+                        FormatLogger.WriteErrorLine("Can't write diagnostics to file {0}\n", DiagnosticsOutputFilename);
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
             var batchFixer = WellKnownFixAllProviders.BatchFixer;
 
             var context = new FixAllContext(

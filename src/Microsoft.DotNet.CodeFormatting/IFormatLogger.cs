@@ -64,4 +64,43 @@ namespace Microsoft.DotNet.CodeFormatting
         {
         }
     }
+
+    /// <summary>
+    /// This implementation will forward all output to the a file.
+    /// </summary>
+    internal sealed class FileFormatLogger : IFormatLogger, IDisposable
+    {
+        private readonly System.IO.StreamWriter _streamWriter;
+
+        public FileFormatLogger(string outputFileName)
+        {
+            _streamWriter = new System.IO.StreamWriter(outputFileName, true);
+        }
+
+        public void Write(string format, params object[] args)
+        {
+            _streamWriter.Write(format, args);
+        }
+
+        public void WriteLine(string format, params object[] args)
+        {
+            _streamWriter.WriteLine(format, args);
+        }
+
+        public void WriteErrorLine(string format, params object[] args)
+        {
+            _streamWriter.Write("Error: ");
+            _streamWriter.WriteLine(format, args);
+        }
+
+        public void WriteLine()
+        {
+            _streamWriter.WriteLine();
+        }
+
+        public void Dispose()
+        {
+            _streamWriter.Dispose();
+        }
+    }
 }

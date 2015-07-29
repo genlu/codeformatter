@@ -30,7 +30,8 @@ namespace CodeFormatter
             null,
             allowTables: false,
             verbose: false,
-            useAnalyzers: false);
+            useAnalyzers: false,
+            diagnosticsOutputFileName: string.Empty);
 
         public static readonly CommandLineOptions ListAnalyzers = new CommandLineOptions(
             Operation.ListRules,
@@ -42,7 +43,8 @@ namespace CodeFormatter
             null,
             allowTables: false,
             verbose: false,
-            useAnalyzers: true);
+            useAnalyzers: true,
+            diagnosticsOutputFileName: string.Empty);
 
         public readonly Operation Operation;
         public readonly ImmutableArray<string[]> PreprocessorConfigurations;
@@ -54,6 +56,7 @@ namespace CodeFormatter
         public readonly bool AllowTables;
         public readonly bool Verbose;
         public readonly bool UseAnalyzers;
+        public readonly string DiagnosticsOutputFileName;
 
         public CommandLineOptions(
             Operation operation,
@@ -65,7 +68,8 @@ namespace CodeFormatter
             string language,
             bool allowTables,
             bool verbose,
-            bool useAnalyzers)
+            bool useAnalyzers,
+            string diagnosticsOutputFileName)
         {
             Operation = operation;
             PreprocessorConfigurations = preprocessorConfigurations;
@@ -77,6 +81,7 @@ namespace CodeFormatter
             AllowTables = allowTables;
             Verbose = verbose;
             UseAnalyzers = useAnalyzers;
+            DiagnosticsOutputFileName = diagnosticsOutputFileName;
         }
     }
 
@@ -139,6 +144,7 @@ namespace CodeFormatter
         private const string RuleEnabledSwitch1 = "/rule+:";
         private const string RuleEnabledSwitch2 = "/rule:";
         private const string RuleDisabledSwitch = "/rule-:";
+        private const string OutputFileSwitch = "/outputfile:";
         private const string Usage =
 @"CodeFormatter [/file:<filename>] [/lang:<language>] [/c:<config>[,<config>...]>]
     [/copyright:<file> | /nocopyright] [/tables] [/nounicode] 
@@ -163,6 +169,7 @@ namespace CodeFormatter
                    formatting operations. (Default is to use codeformatter's
                    ""rule""-based operations.)
     /analyzers   - List the available Roslyn diagnostics.
+    /outputfile  - specify the file name for output of all diagnostics from analyzers.
 ";
 
         public static void PrintUsage()
@@ -190,6 +197,7 @@ namespace CodeFormatter
             var allowTables = false;
             var verbose = false;
             var useAnalyzers = false;
+            var outputFileName = string.Empty;
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -235,6 +243,10 @@ namespace CodeFormatter
                 else if (comparer.Equals(arg, "/useanalyzers"))
                 {
                     useAnalyzers = true;
+                }
+                else if (arg.StartsWith(OutputFileSwitch, comparison))
+                {
+                    outputFileName = arg.Substring(OutputFileSwitch.Length);
                 }
                 else if (arg.StartsWith(FileSwitch, comparison))
                 {
@@ -285,7 +297,8 @@ namespace CodeFormatter
                 language,
                 allowTables,
                 verbose,
-                useAnalyzers);
+                useAnalyzers,
+                outputFileName);
             return CommandLineParseResult.CreateSuccess(options);
         }
 

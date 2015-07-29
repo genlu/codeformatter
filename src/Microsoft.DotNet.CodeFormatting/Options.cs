@@ -20,12 +20,15 @@ namespace Microsoft.DotNet.CodeFormatting
         /// </summary>
         internal ImmutableArray<string> FileNames { get; set; }
 
+        internal string DiagnosticsOutputFileName { get; set; }
+
         internal IFormatLogger FormatLogger { get; set; }
 
         public Options()
         {
             CopyrightHeader = FormattingDefaults.DefaultCopyrightHeader;
             FileNames = ImmutableArray<string>.Empty;
+            DiagnosticsOutputFileName = string.Empty;
             PreprocessorConfigurations = ImmutableArray<string[]>.Empty;
             FormatLogger = new ConsoleFormatLogger();
         }
